@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>tutorial.misionTIC</groupId>
-	<artifactId>seguridad</artifactId>
+	<artifactId>MinTic-UNAL-Ciclo4a-Seguridad</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>seguridad</name>
+	<name>MinTic-UNAL-Ciclo4a-Seguridad</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>18</java.version>
