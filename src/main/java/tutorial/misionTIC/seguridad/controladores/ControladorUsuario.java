@@ -47,7 +47,7 @@ public class ControladorUsuario {
 
     @GetMapping("{idUsuario}")
     public Usuario buscarUsuario(@PathVariable String idUsuario) {
-        return  miRepositorioUsuario
+        return miRepositorioUsuario
                 .findById(idUsuario)
                 .orElse(new Usuario("", "", ""));
     }
@@ -94,14 +94,13 @@ public class ControladorUsuario {
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-256");
-        }
-        catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return null;
         }
         byte[] hash = md.digest(password.getBytes());
         StringBuffer sb = new StringBuffer();
-        for(byte b : hash) {
+        for (byte b : hash) {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
