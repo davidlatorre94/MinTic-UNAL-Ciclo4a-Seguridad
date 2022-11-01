@@ -1,0 +1,10 @@
+package tutorial.misionTIC.seguridad.modelos;
+
+import lombok.Data;
+
+@Data
+public class MessageResponse {
+
+    private String message;
+
+}
