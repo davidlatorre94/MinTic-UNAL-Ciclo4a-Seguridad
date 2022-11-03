@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import tutorial.misionTIC.seguridad.modelos.MessageResponse;
+import tutorial.misionTIC.seguridad.modelos.Rol;
 import tutorial.misionTIC.seguridad.modelos.Usuario;
+import tutorial.misionTIC.seguridad.repositorios.RepositorioRol;
 import tutorial.misionTIC.seguridad.repositorios.RepositorioUsuario;
 
 import java.security.MessageDigest;
@@ -30,6 +32,9 @@ public class ControladorUsuario {
     @Autowired
     RepositorioUsuario miRepositorioUsuario;
 
+    @Autowired
+    RepositorioRol miRepositorioRol;
+
     @GetMapping
     public List<Usuario> buscarTodosLosUsuarios() {
         log.info("Buscando todos los usuarios....");
@@ -40,6 +45,7 @@ public class ControladorUsuario {
     @PostMapping
     public Usuario crearUsuario(@RequestBody Usuario infoUsuario) {
         log.info("Creando un usuario.....");
+
         String contrasenaCifrada = convertirSHA256(infoUsuario.getContrasena());
         infoUsuario.setContrasena(contrasenaCifrada);
         return miRepositorioUsuario.save(infoUsuario);
@@ -87,8 +93,44 @@ public class ControladorUsuario {
             // 3. No se encuentra el usuario en BD, se retorna null.
             return null;
         }
-
     }
+
+    @PutMapping("{idUsuario}/rol/{idRol}")
+    public Usuario asignarRolAlUsuario(@PathVariable String idUsuario, @PathVariable String idRol) {
+        Usuario usuario = miRepositorioUsuario
+                .findById(idUsuario)
+                .orElse(null);
+
+        Rol rol = miRepositorioRol
+                .findById(idRol)
+                .orElse(null);
+
+        if (usuario != null && rol != null) {
+            usuario.setRol(rol);
+            return miRepositorioUsuario.save(usuario);
+        } else {
+            return null;
+        }
+    }
+
+    @PostMapping("validar-usuario")
+    public Usuario validarUsuario(@RequestBody Usuario infoUsuario) {
+        log.info("Validando el usuario, request body: {}", infoUsuario);
+
+        //Busco el usuario en base de datos dado el email
+        Usuario usuarioActual = miRepositorioUsuario.findByEmail(infoUsuario.getCorreo());
+
+        //Comparar las contraseñas que llegan desde postman y la que está en BD
+        String contrasenaUsuario = convertirSHA256(infoUsuario.getContrasena());
+        String contrasenaBaseDatos = usuarioActual.getContrasena();
+
+        if (contrasenaUsuario.equals(contrasenaBaseDatos)) {
+            return usuarioActual;
+        } else {
+            return null;
+        }
+    }
+
 
     public String convertirSHA256(String password) {
         MessageDigest md = null;
