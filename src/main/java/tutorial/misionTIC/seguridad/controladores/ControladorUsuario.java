@@ -19,6 +19,8 @@ import tutorial.misionTIC.seguridad.modelos.Usuario;
 import tutorial.misionTIC.seguridad.repositorios.RepositorioRol;
 import tutorial.misionTIC.seguridad.repositorios.RepositorioUsuario;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -114,19 +116,26 @@ public class ControladorUsuario {
     }
 
     @PostMapping("validar-usuario")
-    public Usuario validarUsuario(@RequestBody Usuario infoUsuario) {
+    public Usuario validarUsuario(@RequestBody Usuario infoUsuario, HttpServletResponse response) throws IOException {
         log.info("Validando el usuario, request body: {}", infoUsuario);
 
         //Busco el usuario en base de datos dado el email
         Usuario usuarioActual = miRepositorioUsuario.findByEmail(infoUsuario.getCorreo());
 
-        //Comparar las contraseñas que llegan desde postman y la que está en BD
-        String contrasenaUsuario = convertirSHA256(infoUsuario.getContrasena());
-        String contrasenaBaseDatos = usuarioActual.getContrasena();
+        if (usuarioActual != null) {
+            //Comparar las contraseñas que llegan desde postman y la que está en BD
+            String contrasenaUsuario = convertirSHA256(infoUsuario.getContrasena());
+            String contrasenaBaseDatos = usuarioActual.getContrasena();
 
-        if (contrasenaUsuario.equals(contrasenaBaseDatos)) {
-            return usuarioActual;
+            if (contrasenaUsuario.equals(contrasenaBaseDatos)) {
+                usuarioActual.setContrasena("");
+                return usuarioActual;
+            } else {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                return null;
+            }
         } else {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
     }
